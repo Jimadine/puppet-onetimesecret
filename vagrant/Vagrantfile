@@ -1,0 +1,50 @@
+Vagrant.configure(2) do |config|
+
+  # config.vm.box = "ubuntu/trusty64"
+  # config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.provider "virtualbox" do |vb|
+	vb.name = "_ots"
+	vb.memory = 512
+	vb.cpus = 1
+  end
+
+  config.vm.network "forwarded_port", guest: 7143, host: 7143, host_ip: "127.0.0.1", auto_correct: true
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # Allow password auth in ubuntu/xenial64 [avoids "Disconnected: No supported authentication methods available (server sent: publickey)"]
+    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config && systemctl reload sshd
+    rm /etc/localtime && ln -s /usr/share/zoneinfo/Europe/London /etc/localtime
+    version=$(lsb_release -sr)
+    case $version in
+    14.04|16.04)
+      ( apt-key list | grep -q Puppet ) || ( curl -L https://apt.puppetlabs.com/DEB-GPG-KEY-puppet | sudo apt-key add - )
+      test -f /etc/apt/sources.list.d/puppet5.list || ( echo "deb https://apt.puppetlabs.com $(lsb_release -c -s) puppet5" > /etc/apt/sources.list.d/puppet5.list )
+      apt-get update
+      apt-get install -y tree git nano puppet-agent
+      # For Ubuntu 16, use Puppetlabs package, and create the relevant symlinks
+      test -L /etc/puppet || ln -s /etc/puppetlabs/ /etc/puppet
+      test -L /etc/puppet/modules || ln -s /etc/puppetlabs/code/environments/production/modules /etc/puppet/modules
+      /opt/puppetlabs/bin/puppet module install puppetlabs-stdlib --version 4.25.1
+
+      ;;
+    18.04)
+     # For Ubuntu 18 package version, use line below, and apt install puppet instead of puppet-agent
+     apt-get update
+     apt-get install -y tree git nano puppet
+    # This is workaround for a problem with Ubuntu 18 / Puppet 5 as per https://ask.puppet.com/question/34025/puppet-540-on-ubuntu-1804-error-could-not-find-class/?answer=34618#post-id-34618
+     test -L /etc/puppet/modules || ln -s /etc/puppet/code/modules /etc/puppet/modules
+     puppet module install puppetlabs-stdlib --version 4.25.1
+    esac
+  SHELL
+
+  config.vm.provision "puppet" do |puppet|
+    puppet.module_path="../../"
+    puppet.hiera_config_path = "hiera.yaml"
+    puppet.facter = {
+      "vagrant" => "1"
+    }
+  end
+
+end

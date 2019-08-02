@@ -1,0 +1,5 @@
+# ignore vagrant local directory
+vagrant/.vagrant
+
+# ignore vagrant cloud logging
+modules/*/vagrant/ubuntu-*-cloudimg-console.log

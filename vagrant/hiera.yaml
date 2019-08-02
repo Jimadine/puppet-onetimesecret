@@ -1,0 +1,23 @@
+---
+  version: 5
+  hierarchy:
+    - name: "Yaml backend"
+      data_hash: yaml_data
+      paths:
+        - "vagrant/%{::fqdn}.yaml"
+        - "live/fqdn/%{::clientcert}.yaml"
+        # - "live/role/%{role}.yaml"
+        - "vagrant/default.yaml"
+        - "vagrant/local.yaml"
+        - "live/common/default.yaml"
+      datadir: /tmp/vagrant-puppet/hieradata
+    - name: "Eyaml backend"
+      lookup_key: eyaml_lookup_key
+      paths:
+        - "vagrant/%{::fqdn}.eyaml"
+        - "live/fqdn/%{::clientcert}.eyaml"
+        # - "live/role/%{role}.eyaml"
+        - "vagrant/default.eyaml"
+        - "vagrant/local.eyaml"
+        - "live/common/default.eyaml"
+      datadir: /tmp/vagrant-puppet/hieradata
