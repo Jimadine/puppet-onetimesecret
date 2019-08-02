@@ -14,22 +14,16 @@ class onetimesecret::install {
   # Should we manage the package/archive installation?
   if ( $::onetimesecret::manage_package == true ) {
 
-    $package_name = $onetimesecret::package_name
-    $version      = $onetimesecret::version
-    $filename     = "${version}.zip"
+    $package_name    = $onetimesecret::package_name
+    $version         = $onetimesecret::version
+    $filename        = "${version}.zip"
+    $fulldownloadurl = "${onetimesecret::download_url}/${filename}"
 
-    # Stop puppet from sending an http HEAD request on every run
-    if find_file("${onetimesecret::install_dir}/${filename}") == undef {
-      $fulldownloadurl = "${onetimesecret::download_url}/${filename}"
-    }
-    else { $fulldownloadurl = undef }
-
-    file { "${onetimesecret::install_dir}/${filename}":
-      ensure  => file,
+    onetimesecret::remote_file { "${onetimesecret::install_dir}/${filename}":
       owner   => 'root',
       mode    => '0644',
       group   => $onetimesecret::root_group,
-      source  => $fulldownloadurl,
+      url     => $fulldownloadurl,
       notify  => Exec['unzip'],
       require => Package[$onetimesecret::additional_packages],
     }
