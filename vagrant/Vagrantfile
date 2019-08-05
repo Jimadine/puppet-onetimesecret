@@ -27,7 +27,6 @@ Vagrant.configure(2) do |config|
       test -L /etc/puppet || ln -s /etc/puppetlabs/ /etc/puppet
       test -L /etc/puppet/modules || ln -s /etc/puppetlabs/code/environments/production/modules /etc/puppet/modules
       /opt/puppetlabs/bin/puppet module install puppetlabs-stdlib --version 4.25.1
-
       ;;
     18.04)
      # For Ubuntu 18 package version, use line below, and apt install puppet instead of puppet-agent
