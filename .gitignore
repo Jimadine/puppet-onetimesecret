@@ -2,4 +2,4 @@
 vagrant/.vagrant
 
 # ignore vagrant cloud logging
-modules/*/vagrant/ubuntu-*-cloudimg-console.log
+vagrant/ubuntu-*-cloudimg-console.log
